@@ -64,8 +64,20 @@
     </div>
 </section>
 
-<div class="modal fade lotka-modal" id="humanQuoteModal" tabindex="-1" aria-label="Human Quote"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content bg-dark text-white p-4"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button><h3>Human Freight Request</h3><div class="lotka-rfq-mount" data-channel="HUMAN"></div></div></div></div>
+<div class="modal fade lotka-modal" id="humanQuoteModal" tabindex="-1" aria-label="Human Quote"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content hq-card text-white p-4"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button><div class="hq-eyebrow">Human Quote Request</div><h2 class="hq-title">Tell us about your shipment</h2><p class="hq-sub">Complete the customer details, then choose Sea FCL, Sea LCL, or Air Freight. Required fields are marked with an asterisk.</p><div class="lotka-rfq-mount" data-channel="HUMAN"></div></div></div></div>
 <div class="modal fade lotka-modal" id="aiQuoteModal" tabindex="-1" aria-label="AI Quote"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content bg-dark text-white p-4"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button><h3>AI-Assisted Freight Request</h3><p>Requests are reviewed by our sales team. No instant rate is generated.</p><div class="lotka-rfq-mount" data-channel="AI"></div></div></div></div>
+<style>
+#humanQuoteModal .hq-card{background:linear-gradient(145deg,#06182b,#0a2d4a 52%,#09243c);border:1px solid rgba(255,255,255,.15);border-radius:22px}
+#humanQuoteModal .hq-eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#93c7e8;font-weight:800}
+#humanQuoteModal .hq-title{font-size:clamp(28px,4vw,48px);margin:8px 0}
+#humanQuoteModal .hq-sub{color:#c6d9e8;line-height:1.55}
+#humanQuoteModal .lotka-rfq-mount form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#humanQuoteModal .lotka-rfq-mount form>label{font-weight:700;color:#d8e6f0}
+#humanQuoteModal .lotka-rfq-mount input,#humanQuoteModal .lotka-rfq-mount select{border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px}
+#humanQuoteModal .rfq-mode-fields,#humanQuoteModal .rfq-dg-fields,#humanQuoteModal .rfq-turnstile,#humanQuoteModal .rfq-result{grid-column:1/-1}
+#humanQuoteModal button[type=submit]{background:#ef2231;border:0;border-radius:24px;padding:12px 20px;font-weight:800}
+@media(max-width:700px){#humanQuoteModal .lotka-rfq-mount form{grid-template-columns:1fr}}
+</style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script>
 window.LOTKA_TURNSTILE_SITE_KEY = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Configuration["LOTKA_WEBSITE_TURNSTILE_SITE_KEY"]));
