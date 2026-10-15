@@ -285,23 +285,8 @@
 <script>
     function handleHumanQuoteSubmit() {
         const alertBox = document.getElementById('humanFormAlert');
-        const submitBtn = document.getElementById('humanSubmitBtn');
-        const name = document.getElementById('humanName').value || 'Valued Shipper';
-
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Assigning Specialist...';
-        }
-
-        setTimeout(() => {
-            if (alertBox) {
-                alertBox.className = 'alert alert-success d-block small';
-                alertBox.innerHTML = `<strong>Thank you, ${name}!</strong> Your request has been assigned to Senior Freight Coordinator <strong>Ahmed Al-Mansoor</strong> at Dubai JAFZA HQ. Our team will review the cargo specifics and contact you within 30 minutes.`;
-            }
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Request Assigned';
-            }
-        }, 800);
+        alertBox.className = 'alert alert-warning d-block small';
+        alertBox.textContent = 'Online quote submission is not yet connected. No request has been sent or assigned. Please contact LOTKA directly by email at info@lotka.com.';
     }
+
 </script>

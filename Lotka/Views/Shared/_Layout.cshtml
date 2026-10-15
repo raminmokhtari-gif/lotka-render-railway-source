@@ -188,14 +188,15 @@
                 </div>
                 <div class="modal-body p-4">
                     <p class="text-white-50 small mb-3">Authorized access for Dubai JAFZA operations managers, AI fleet dispatchers, and customs agents.</p>
-                    <form id="staffLoginForm" onsubmit="event.preventDefault(); alert('Demo environment: Staff credentials simulated successfully.'); $('#staffLoginModal').modal('hide');">
+                    <div id="staffLoginNotice" class="alert alert-warning small" role="status">Staff portal access is not yet available on this website.</div>
+                    <form id="staffLoginForm" onsubmit="event.preventDefault(); document.getElementById('staffLoginNotice').textContent='Staff authentication is not connected to this website. No login has occurred.';">
                         <div class="mb-3">
                             <label class="form-label text-white small">Employee ID or Corporate Email</label>
-                            <input type="email" class="form-control bg-dark text-white border-secondary" placeholder="agent@lotka.com" required value="dxb.dispatcher@lotka.com" />
+                            <input type="email" class="form-control bg-dark text-white border-secondary" placeholder="agent@lotka.com" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-white small">Portal Password</label>
-                            <input type="password" class="form-control bg-dark text-white border-secondary" value="••••••••••••" required />
+                            <input type="password" class="form-control bg-dark text-white border-secondary" required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-white small">Assigned Terminal / Node</label>
