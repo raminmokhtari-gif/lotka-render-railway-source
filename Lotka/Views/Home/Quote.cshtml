@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @model Lotka.Models.QuoteRequestModel
 @{
     ViewData["Title"] = "Get a Quote | Human Specialist & Autonomous AI Estimator (AED)";
@@ -63,230 +64,29 @@
     </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════
-     MODAL 1: HUMAN LOGISTICS SPECIALIST QUOTE
-     ══════════════════════════════════════════════════════════════ -->
-<div class="modal fade lotka-modal" id="humanQuoteModal" tabindex="-1" aria-labelledby="humanModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-info border-opacity-50 shadow-2xl">
-            <!-- Modal Header -->
-            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary px-2 py-1"><i class="fa-solid fa-user-tie"></i> Human Desk</span>
-                    <h5 class="modal-title fw-bold text-white mb-0" id="humanModalTitle">
-                        Human Freight Advisory & Bespoke Quote
-                    </h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-3 p-md-4">
-                <!-- Direct Contact Strip -->
-                <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-4">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div>
-                            <div class="fw-bold text-white small"><i class="fa-solid fa-building-circle-check text-info me-2"></i> Dubai JAFZA One Operations Command</div>
-                            <div class="text-white-50 small">Direct Line: <a href="tel:+97148818618" class="text-info text-decoration-none fw-semibold">+971 4 8818618</a> &bull; Email: <a href="mailto:quote@lotka.com" class="text-info text-decoration-none fw-semibold">quote@lotka.com</a></div>
-                        </div>
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1 small">
-                            <i class="fa-solid fa-circle-dot me-1"></i> Coordinators Online
-                        </span>
-                    </div>
-                </div>
-
-                <div id="humanFormAlert" class="alert d-none small" role="alert"></div>
-
-                <!-- Human Quote Form -->
-                <form id="humanQuoteForm" onsubmit="event.preventDefault(); handleHumanQuoteSubmit();">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Full Name / Contact Person</label>
-                            <input type="text" id="humanName" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Tariq Mansoor" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Company / Trading Entity</label>
-                            <input type="text" id="humanCompany" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Emirates Trading LLC" required />
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Corporate Email</label>
-                            <input type="email" id="humanEmail" class="form-control bg-dark text-white border-secondary" placeholder="tariq@emirates.ae" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Phone / WhatsApp Number</label>
-                            <input type="tel" id="humanPhone" class="form-control bg-dark text-white border-secondary" placeholder="+971 50 123 4567" required />
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Port of Origin</label>
-                            <input type="text" id="humanOrigin" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Jebel Ali (JAFZA), Dubai" required value="Jebel Ali Port (JAFZA)" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Port of Destination</label>
-                            <input type="text" id="humanDestination" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Port of Rotterdam" required value="Port of Rotterdam" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-white-50 small">Cargo Classification</label>
-                        <select id="humanCargoType" class="form-select bg-dark text-white border-secondary">
-                            <option selected>General Commercial Freight (FCL / LCL)</option>
-                            <option>Refrigerated / Cold-Chain Pharma & Food</option>
-                            <option>Project Cargo & Breakbulk (Heavy Lift / Oversized)</option>
-                            <option>Dangerous Goods (IMO / Hazmat Certified)</option>
-                            <option>Diplomatic & High-Value Air Cargo</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-white-50 small">Specific Requirements & Remarks</label>
-                        <textarea id="humanNotes" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Provide estimated container count, tonnage, or required loading date..."></textarea>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="humanSubmitBtn" class="btn btn-primary px-4 fw-semibold">
-                            <i class="fa-solid fa-paper-plane me-1"></i> Assign to Senior Specialist
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     MODAL 2: AUTONOMOUS AI INSTANT FREIGHT ESTIMATOR (AED)
-     ══════════════════════════════════════════════════════════════ -->
-@* <div class="modal fade lotka-modal" id="aiQuoteModal" tabindex="-1" aria-labelledby="aiModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-danger border-opacity-50 shadow-2xl">
-            <!-- Modal Header -->
-            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-danger px-2 py-1"><i class="fa-solid fa-robot"></i> AI Engine</span>
-                    <h5 class="modal-title fw-bold text-white mb-0" id="aiModalTitle">
-                        Autonomous AI Instant Freight Estimator (AED)
-                    </h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-3 p-md-4">
-                <p class="text-white-50 small mb-4">
-                    Real-time algorithmic pricing indexed against live bunker indices, air cargo spot tariffs, and Dubai Customs rates.
-                </p>
-
-                <!-- Dedicated AI Form -->
-                <form id="dedicatedQuoteForm">
-                    <!-- Freight Mode Radios -->
-                    <div class="mb-4">
-                        <label class="form-label text-white small fw-bold text-uppercase mb-2">Select Transport Mode</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            <input type="radio" class="btn-check" name="freightType" id="modeOcean" value="Ocean" checked autocomplete="off">
-                            <label class="btn btn-outline-info text-white flex-grow-1" for="modeOcean">
-                                <i class="fa-solid fa-ship me-1"></i> Ocean Freight
-                            </label>
-
-                            <input type="radio" class="btn-check" name="freightType" id="modeAir" value="Air" autocomplete="off">
-                            <label class="btn btn-outline-info text-white flex-grow-1" for="modeAir">
-                                <i class="fa-solid fa-plane me-1"></i> Air Freight
-                            </label>
-
-                            <input type="radio" class="btn-check" name="freightType" id="modeLand" value="Land" autocomplete="off">
-                            <label class="btn btn-outline-info text-white flex-grow-1" for="modeLand">
-                                <i class="fa-solid fa-truck-fast me-1"></i> Land Express
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Origin Hub</label>
-                            <select id="quoteOrigin" class="form-select bg-dark text-white border-secondary">
-                                <option value="Dubai JAFZA Hub" selected>Dubai JAFZA Hub (UAE)</option>
-                                <option value="Singapore Port">Singapore Hub</option>
-                                <option value="Shanghai Port">Shanghai Terminal</option>
-                                <option value="Rotterdam Port">Rotterdam Port</option>
-                                <option value="Houston Hub">Houston Americas Terminal</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Destination Gateway</label>
-                            <select id="quoteDestination" class="form-select bg-dark text-white border-secondary">
-                                <option value="Port of Rotterdam" selected>Port of Rotterdam (Europe)</option>
-                                <option value="Hamburg Port">Hamburg Port (Germany)</option>
-                                <option value="Jeddah Islamic Port">Jeddah Islamic Port (KSA)</option>
-                                <option value="Singapore Gateway">Singapore Gateway</option>
-                                <option value="Dubai JAFZA Hub">Dubai JAFZA Terminal (UAE)</option>
-                                <option value="Los Angeles Port">Port of Los Angeles (USA)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Cargo Weight (kg)</label>
-                            <div class="input-group">
-                                <input type="number" id="quoteWeight" class="form-control bg-dark text-white border-secondary" value="1200" min="10" max="50000" required />
-                                <span class="input-group-text bg-dark text-white-50 border-secondary">KG</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-white-50 small">Container / Cargo Units</label>
-                            <select class="form-select bg-dark text-white border-secondary">
-                                <option selected>1 x 20' Standard Dry (FCL)</option>
-                                <option>1 x 40' High Cube Dry (FCL)</option>
-                                <option>Less than Container Load (LCL Palletized)</option>
-                                <option>Air Cargo ULD Container</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btnRunAiCalc" class="btn btn-lotka-red w-100 py-3 fw-bold fs-6 shadow">
-                        <i class="fa-solid fa-calculator me-2"></i> Compute Instant AI Quote in AED
-                    </button>
-                </form>
-
-                <!-- AI Calculation Output Card -->
-                <div class="mt-4 p-3 rounded-3 bg-dark border border-danger border-opacity-50">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-white-50 small text-uppercase fw-semibold" style="letter-spacing: 1px;">Estimated Rate</span>
-                        <span class="badge bg-danger">Zero Volatility AED Pegged</span>
-                    </div>
-                    <div class="d-flex align-items-baseline gap-2 mb-2">
-                        <div class="display-6 fw-bold text-white text-danger" id="quoteDisplayPrice">AED 5,685.00</div>
-                        <span class="text-white-50 small">(Includes fuel & JAFZA customs)</span>
-                    </div>
-                    <div class="small text-white-50 mb-1" id="quoteDisplaySummary">
-                        Ocean Freight from Dubai JAFZA Hub to Port of Rotterdam (1200 kg)
-                    </div>
-                    <div class="small text-info fw-semibold">
-                        <i class="fa-solid fa-stopwatch me-1"></i> Estimated Transit: <span id="quoteDisplayTransit">14 - 22 Business Days</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer border-top border-secondary border-opacity-25 d-flex justify-content-between">
-                <span class="text-white-50 small"><i class="fa-solid fa-shield-halved text-success me-1"></i> Rates valid for 7 days upon generation</span>
-                <button type="button" class="btn btn-outline-light btn-sm px-4" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div> *@
-
+<div class="modal fade lotka-modal" id="humanQuoteModal" tabindex="-1" aria-label="Human Quote"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content bg-dark text-white p-4"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button><h3>Human Freight Request</h3><div class="lotka-rfq-mount" data-channel="HUMAN"></div></div></div></div>
+<div class="modal fade lotka-modal" id="aiQuoteModal" tabindex="-1" aria-label="AI Quote"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content bg-dark text-white p-4"><button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button><h3>AI-Assisted Freight Request</h3><p>Requests are reviewed by our sales team. No instant rate is generated.</p><div class="lotka-rfq-mount" data-channel="AI"></div></div></div></div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script>
-    function handleHumanQuoteSubmit() {
-        const alertBox = document.getElementById('humanFormAlert');
-        alertBox.className = 'alert alert-warning d-block small';
-        alertBox.textContent = 'Online quote submission is not yet connected. No request has been sent or assigned. Please contact LOTKA directly by email at info@lotka.com.';
-    }
-
+window.LOTKA_TURNSTILE_SITE_KEY = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Configuration["LOTKA_WEBSITE_TURNSTILE_SITE_KEY"]));
+(() => {
+ const fields=['first_name','last_name','company','address','city','country','mobile','telephone','email','origin','destination','commodity','cargo_ready_date'];
+ const title=x=>x.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+ const input=(name,type='text')=>`<label class="form-label d-block mb-2">${title(name)}<input class="form-control bg-dark text-white" name="${name}" type="${type}" maxlength="512" required></label>`;
+ for(const mount of document.querySelectorAll('.lotka-rfq-mount')) {
+   const channel=mount.dataset.channel;
+   const form=document.createElement('form');
+   form.innerHTML=`<label class="d-block mb-3">Freight service<select name="mode" class="form-select" required><option value="SEA_FCL">Sea FCL</option><option value="SEA_LCL">Sea LCL</option><option value="AIR">Air Freight</option></select></label>`+fields.map(k=>input(k,k==='email'?'email':k==='cargo_ready_date'?'date':'text')).join('')+`<div class="rfq-mode-fields"></div><label class="d-block mb-2"><input type="checkbox" name="dangerous_goods"> Dangerous goods</label><div class="rfq-dg-fields"></div><label class="d-block mb-3"><input type="checkbox" name="privacy_consent" required> I consent to LOTKA processing my information for this freight request.</label><div class="rfq-turnstile"></div><div class="rfq-result" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Submit Request</button>`;
+   mount.append(form);
+   if(window.LOTKA_TURNSTILE_SITE_KEY) {
+     const mountWidget=()=>{ if(!window.turnstile){setTimeout(mountWidget,200);return;} window.turnstile.render(form.querySelector(".rfq-turnstile"),{sitekey:window.LOTKA_TURNSTILE_SITE_KEY}); };
+     mountWidget();
+   }
+   const modeFields=form.querySelector('.rfq-mode-fields'), dgFields=form.querySelector('.rfq-dg-fields');
+   const render=()=>{const mode=form.elements.mode.value;modeFields.innerHTML=mode==='SEA_FCL'?`<h5>Container details</h5>${input('packing')}${input('packages','number')}<label>Container size<select name="size" class="form-select"><option>20</option><option>40</option><option>40HQ</option></select></label><label>Container type<select name="type" class="form-select"><option>DC</option><option>HQ</option><option>REEFER</option></select></label>${input('quantity','number')}${input('weight_kg','number')}`:`<h5>Package details</h5>${['count','length_cm','width_cm','height_cm','weight_kg'].map(x=>input(x,'number')).join('')}${mode==='AIR'?`<label>Temperature control<select name="temperature_control" class="form-select"><option value="NORMAL">Normal</option><option value="REEFER">Reefer</option></select></label><div class="rfq-temperature"></div>`:''}`; const tc=form.elements.temperature_control;if(tc){const change=()=>form.querySelector('.rfq-temperature').innerHTML=tc.value==='REEFER'?input('temperature_c'):'';tc.addEventListener('change',change);change();}};
+   const renderDg=()=>dgFields.innerHTML=form.elements.dangerous_goods.checked?input('un_number')+input('dg_class'):'';
+   form.elements.mode.addEventListener('change',render);form.elements.dangerous_goods.addEventListener('change',renderDg);render();
+   form.addEventListener('submit',async e=>{e.preventDefault();const result=form.querySelector('.rfq-result');result.textContent='Submission unavailable until secure verification is configured. No request was sent.';const siteKey=window.LOTKA_TURNSTILE_SITE_KEY;if(!siteKey||!window.turnstile){return;}const token=form.querySelector('[name="cf-turnstile-response"]')?.value;if(!token){result.textContent='Please complete verification.';return;}const data=Object.fromEntries(new FormData(form));data.channel=channel;data.privacy_consent=true;data.dangerous_goods=form.elements.dangerous_goods.checked;data.turnstile_token=token;data.website='';if(data.mode==='SEA_FCL'){data.containers=[{quantity:Number(data.quantity),size:data.size,type:data.type,weight_kg:data.weight_kg}];data.packages=Number(data.packages);}else{data.packages=[{count:Number(data.count),length_cm:data.length_cm,width_cm:data.width_cm,height_cm:data.height_cm,weight_kg:data.weight_kg}];}const key=crypto.randomUUID();try{const reply=await fetch('/api/lotka-platform/rfq',{method:'POST',headers:{'Content-Type':'application/json','X-Request-Key':key},body:JSON.stringify(data)});const body=await reply.json();result.textContent=reply.ok&&body.rfq_id?`Request received: ${body.rfq_id}`:`Request not accepted: ${body.error||reply.status}`;}catch{result.textContent='Network error. Request confirmation unavailable.';}});
+ }
+})();
 </script>
