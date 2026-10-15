@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient("lotka1", client => client.Timeout = TimeSpan.FromSeconds(8));
 
 // Bind dynamically to PORT if provided by environment (e.g., Render)
 var port = Environment.GetEnvironmentVariable("PORT");
@@ -34,6 +35,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",
