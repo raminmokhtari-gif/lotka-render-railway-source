@@ -18,9 +18,49 @@ public sealed class LotkaPlatformController : ControllerBase
         _config = config;
     }
 
+    // Authenticates against the existing LOTKA 1 identity service.
+    // No upstream session token or credential is exposed to the browser.
+    [HttpPost("admin-login")]
+    [RequestSizeLimit(4096)]
+    public async Task<IActionResult> AdminLogin([FromBody] AdminLoginInput input, CancellationToken cancellationToken)
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var now = DateTime.UtcNow;
+        var count = LoginAttempts.AddOrUpdate(ip, (1, now), (_, old) =>
+            (now - old.Start).TotalMinutes >= 1 ? (1, now) : (old.Count + 1, old.Start));
+        if (count.Count > 5) return StatusCode(429, new { authenticated = false });
+        if (string.IsNullOrWhiteSpace(input.Username) || string.IsNullOrWhiteSpace(input.Password))
+            return BadRequest(new { authenticated = false });
+        var endpoint = _config["LOTKA1_INTERNAL_URL"];
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != "http" && uri.Scheme != "https") || !string.IsNullOrEmpty(uri.UserInfo))
+            return StatusCode(503, new { authenticated = false });
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(uri, "/api/auth/login"));
+            request.Content = new StringContent(JsonSerializer.Serialize(new {
+                username = input.Username, password = input.Password
+            }), Encoding.UTF8, "application/json");
+            using var reply = await _clients.CreateClient("lotka1").SendAsync(request, cancellationToken);
+            if (reply.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                return StatusCode(429, new { authenticated = false });
+            if (!reply.IsSuccessStatusCode)
+                return Unauthorized(new { authenticated = false });
+            using var json = JsonDocument.Parse(await reply.Content.ReadAsStringAsync(cancellationToken));
+            if (!json.RootElement.TryGetProperty("session", out var session) ||
+                session.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(session.GetString()))
+                return Unauthorized(new { authenticated = false });
+            return Ok(new { authenticated = true });
+        }
+        catch (HttpRequestException) { return StatusCode(502, new { authenticated = false }); }
+        catch (TaskCanceledException) { return StatusCode(504, new { authenticated = false }); }
+    }
+    public sealed record AdminLoginInput(string Username, string Password);
+
     // Browser-facing RFQ gateway. Disabled until owner-approved CAPTCHA and
     // server-side token are configured. No client receives the upstream token.
     private static readonly ConcurrentDictionary<string, (int Count, DateTime Start)> Attempts = new();
+    private static readonly ConcurrentDictionary<string, (int Count, DateTime Start)> LoginAttempts = new();
 
     [HttpPost("rfq")]
     [RequestSizeLimit(32768)]

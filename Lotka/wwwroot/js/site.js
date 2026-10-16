@@ -497,25 +497,30 @@
         }
     };
 
-    window.handleStaffLoginSubmit = function () {
+    window.handleStaffLoginSubmit = async function () {
         const alertBox = document.getElementById('staffLoginAlert');
         const submitBtn = document.getElementById('staffSubmitBtn');
-
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Authenticating JAFZA Command...';
-        }
-
-        setTimeout(() => {
-            if (alertBox) {
-                alertBox.className = 'alert alert-success d-block small';
-                alertBox.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> <strong>Authenticated:</strong> Connected to Dubai JAFZA Dispatch Terminal. Redirecting to internal operations suite...';
-            }
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Access Granted';
-            }
-        }, 1200);
+        const username = document.getElementById('staffEmailInput')?.value?.trim();
+        const password = document.getElementById('staffPasswordInput')?.value;
+        if (!username || !password) return;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Authenticating...';
+        try {
+            const response = await fetch('/api/lotka-platform/admin-login', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                credentials: 'same-origin', body: JSON.stringify({username,password})
+            });
+            if (!response.ok) throw new Error('Authentication failed. Check your credentials.');
+            const result = await response.json();
+            if (!result.authenticated) throw new Error('Authentication failed.');
+            alertBox.className = 'alert alert-success d-block small';
+            alertBox.textContent = 'Administrator authentication successful.';
+            submitBtn.textContent = 'Authenticated';
+        } catch (error) {
+            alertBox.className = 'alert alert-danger d-block small';
+            alertBox.textContent = error.message || 'Authentication unavailable.';
+            submitBtn.textContent = 'Login';
+        } finally {submitBtn.disabled = false;}
     };
 
     // DOM Ready Initialization
