@@ -88,19 +88,10 @@
 
             const html = await response.text();
 
-            // Push History. Google Analytics is consent-gated in the shared layout.
-            // The GA4 stream's automatic history-event pageviews must be disabled
-            // when this explicit SPA pageview hook is enabled, to prevent duplicates.
+            // Push History. GA4 Enhanced Measurement history-based pageviews are disabled;
+            // this SPA emits exactly one explicit page_view after successful navigation.
             if (pushToHistory) {
                 window.history.pushState(null, '', url);
-                if (typeof window.gtag === 'function'
-                    && window.localStorage.getItem('lotka.analytics.consent.v1') === 'granted') {
-                    window.gtag('event', 'page_view', {
-                        page_location: window.location.href,
-                        page_path: window.location.pathname,
-                        page_title: document.title
-                    });
-                }
             }
 
             // Update DOM content
@@ -110,6 +101,21 @@
                 setTimeout(() => {
                     container.classList.remove('spa-fade-out');
                 }, 50);
+            }
+
+            // Track a completed in-app page transition only after visitor consent.
+            // Use the current page heading so GA4's page-title report remains meaningful.
+            if (pushToHistory && typeof window.gtag === 'function') {
+                try {
+                    if (window.localStorage.getItem('lotka.analytics.consent.v1') === 'granted') {
+                        var heading = container ? container.querySelector('h1') : null;
+                        window.gtag('event', 'page_view', {
+                            page_location: window.location.href,
+                            page_path: window.location.pathname,
+                            page_title: (heading && heading.textContent.trim()) || document.title
+                        });
+                    }
+                } catch (error) { /* Optional analytics must never break navigation. */ }
             }
 
             // Update Active Link in Navbar & Drawer
