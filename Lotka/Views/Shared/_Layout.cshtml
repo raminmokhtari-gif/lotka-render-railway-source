@@ -1,6 +1,23 @@
+@{
+    // Keep collection disabled until LOTKA's own verified GA4 measurement ID is configured.
+    var lotkaGa4MeasurementId = System.Environment.GetEnvironmentVariable("LOTKA_GA4_MEASUREMENT_ID")?.Trim();
+    var lotkaGa4Enabled = lotkaGa4MeasurementId != null
+        && System.Text.RegularExpressions.Regex.IsMatch(lotkaGa4MeasurementId, @"^G-[A-Z0-9]{7,15}$");
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @if (lotkaGa4Enabled)
+    {
+        <!-- LOTKA Google Analytics 4 tag; enhanced measurement handles SPA history navigation. -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=@lotkaGa4MeasurementId"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', '@lotkaGa4MeasurementId');
+        </script>
+    }
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>@ViewData["Title"] - LOTKA Global Logistics</title>
