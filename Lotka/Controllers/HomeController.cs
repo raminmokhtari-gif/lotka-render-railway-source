@@ -71,6 +71,12 @@ namespace Lotka.Controllers
             return RenderSpaView("Contact");
         }
 
+        public IActionResult Privacy()
+        {
+            ViewData["Title"] = "Privacy Policy & Website Analytics";
+            return RenderSpaView("Privacy");
+        }
+
         public IActionResult Quote()
         {
             ViewData["Title"] = "Instant Freight Quote | Real-time AI Estimator";
