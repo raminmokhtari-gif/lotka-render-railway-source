@@ -77,9 +77,19 @@
 
             const html = await response.text();
 
-            // Push History
+            // Push History. Google Analytics is consent-gated in the shared layout.
+            // The GA4 stream's automatic history-event pageviews must be disabled
+            // when this explicit SPA pageview hook is enabled, to prevent duplicates.
             if (pushToHistory) {
                 window.history.pushState(null, '', url);
+                if (typeof window.gtag === 'function'
+                    && window.localStorage.getItem('lotka.analytics.consent.v1') === 'granted') {
+                    window.gtag('event', 'page_view', {
+                        page_location: window.location.href,
+                        page_path: window.location.pathname,
+                        page_title: document.title
+                    });
+                }
             }
 
             // Update DOM content
