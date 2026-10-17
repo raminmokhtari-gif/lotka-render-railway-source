@@ -9,13 +9,104 @@
 <head>
     @if (lotkaGa4Enabled)
     {
-        <!-- LOTKA Google Analytics 4 tag; enhanced measurement handles SPA history navigation. -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=@lotkaGa4MeasurementId"></script>
+        <!-- Google Analytics is optional. No Google analytics requests occur before consent. -->
+        <style>
+            .lotka-consent-banner[hidden] { display: none !important; }
+            .lotka-consent-banner {
+                position: fixed; z-index: 11000; bottom: 1rem; left: 1rem; right: 1rem;
+                margin: 0 auto; max-width: 880px; padding: 1rem 1.15rem;
+                background: #0b1732; border: 1px solid #5e6b86; border-radius: .75rem;
+                box-shadow: 0 .5rem 2rem rgba(0,0,0,.45); color: #f3f6ff;
+                display: flex; align-items: center; justify-content: space-between;
+                flex-wrap: wrap; gap: .8rem; font: 400 14px/1.5 Arial,sans-serif;
+            }
+            .lotka-consent-banner p { margin: 0; flex: 1 1 340px; }
+            .lotka-consent-banner a { color: #a8d9ff; text-decoration: underline; }
+            .lotka-consent-actions { display:flex; flex-wrap:wrap; gap:.55rem; }
+            .lotka-consent-actions button {
+                font: inherit; font-weight: 600; cursor: pointer;
+                padding: .48rem .85rem; border-radius: .45rem; border: 1px solid #b4c2dd;
+            }
+            #lotka-consent-allow { background: #f0f5ff; color: #102044; }
+            #lotka-consent-reject { background: transparent; color: #f3f6ff; }
+        </style>
         <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){ dataLayer.push(arguments); }
-            gtag('js', new Date());
-            gtag('config', '@lotkaGa4MeasurementId');
+            (function () {
+                'use strict';
+                var measurementId = '@lotkaGa4MeasurementId';
+                var preferenceKey = 'lotka.analytics.consent.v1';
+                var loaded = false;
+                function readPreference() {
+                    try { return localStorage.getItem(preferenceKey); }
+                    catch (error) { return null; }
+                }
+                function loadAnalytics() {
+                    if (loaded) return;
+                    loaded = true;
+                    window.dataLayer = window.dataLayer || [];
+                    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+                    window.gtag('consent', 'default', {
+                        analytics_storage: 'denied',
+                        ad_storage: 'denied',
+                        ad_user_data: 'denied',
+                        ad_personalization: 'denied'
+                    });
+                    window.gtag('consent', 'update', { analytics_storage: 'granted' });
+                    window.gtag('js', new Date());
+                    // Enhanced Measurement counts History API page changes: no manual duplicate pageviews.
+                    window.gtag('config', measurementId, {
+                        allow_google_signals: false,
+                        allow_ad_personalization_signals: false
+                    });
+                    var tag = document.createElement('script');
+                    tag.async = true;
+                    tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
+                    document.head.appendChild(tag);
+                }
+                function showPreferences() {
+                    var banner = document.getElementById('lotka-analytics-consent');
+                    if (banner) banner.hidden = false;
+                }
+                function clearAnalyticsCookies() {
+                    // Remove first-party Google Analytics cookies on all applicable LOTKA paths/domains.
+                    document.cookie.split(';').forEach(function (item) {
+                        var name = item.split('=')[0].trim();
+                        if (!/^_ga(?:_|$)/.test(name)) return;
+                        ['/',''].forEach(function (path) {
+                            ['','.lotka.com',location.hostname].forEach(function (domain) {
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path='
+                                    + (path || '/') + (domain ? '; domain=' + domain : '') + '; SameSite=Lax';
+                            });
+                        });
+                    });
+                }
+                function savePreference(accept) {
+                    var previous = readPreference();
+                    try { localStorage.setItem(preferenceKey, accept ? 'granted' : 'denied'); }
+                    catch (error) { /* Private-browsing mode: consent remains for this page only. */ }
+                    var banner = document.getElementById('lotka-analytics-consent');
+                    if (banner) banner.hidden = true;
+                    if (accept) {
+                        loadAnalytics();
+                    } else if (loaded || previous === 'granted') {
+                        if (typeof window.gtag === 'function') {
+                            window.gtag('consent', 'update', { analytics_storage: 'denied' });
+                        }
+                        clearAnalyticsCookies();
+                        window.location.reload();
+                    }
+                }
+                window.lotkaOpenAnalyticsPreferences = showPreferences;
+                document.addEventListener('DOMContentLoaded', function () {
+                    var allow = document.getElementById('lotka-consent-allow');
+                    var reject = document.getElementById('lotka-consent-reject');
+                    if (allow) allow.addEventListener('click', function () { savePreference(true); });
+                    if (reject) reject.addEventListener('click', function () { savePreference(false); });
+                    var preference = readPreference();
+                    if (preference === 'granted') loadAnalytics();
+                    else if (preference !== 'denied') showPreferences();
+                });
+            })();
         </script>
     }
     <meta charset="utf-8" />
@@ -232,6 +323,18 @@
             </div>
         </div>
     </div>
+
+    @if (lotkaGa4Enabled)
+    {
+        <!-- Optional, first-party consent control. This is not a Google tag. -->
+        <div class="lotka-consent-banner" id="lotka-analytics-consent" role="region" aria-label="Analytics privacy preferences" hidden>
+            <p>May we use optional Google Analytics to understand website visits? No analytics starts before you agree. <a href="/Home/Privacy" class="spa-link" data-page="Privacy">Privacy Policy</a></p>
+            <div class="lotka-consent-actions">
+                <button type="button" id="lotka-consent-reject">Reject analytics</button>
+                <button type="button" id="lotka-consent-allow">Allow analytics</button>
+            </div>
+        </div>
+    }
 
     <!-- JavaScript Dependencies -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
