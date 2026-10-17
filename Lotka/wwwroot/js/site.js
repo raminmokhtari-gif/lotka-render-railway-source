@@ -31,6 +31,17 @@
         // Handle Browser History Back / Forward
         window.addEventListener('popstate', function () {
             loadPageContent(window.location.pathname, false);
+            if (typeof window.gtag === 'function') {
+                try {
+                    if (window.localStorage.getItem('lotka.analytics.consent.v1') === 'granted') {
+                        window.gtag('event', 'page_view', {
+                            page_location: window.location.href,
+                            page_path: window.location.pathname,
+                            page_title: document.title
+                        });
+                    }
+                } catch (error) { /* Tracking is optional; navigation must still work. */ }
+            }
         });
     }
 
